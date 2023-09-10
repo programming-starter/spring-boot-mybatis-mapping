@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="me.parker.springbootmybatismapping.mapper.MovieMapper">
+
+    <select id="selectAll" resultType="me.parker.springbootmybatismapping.model.Movie">
+        SELECT movie_id
+             , title
+             , running_time
+             , release_date
+        FROM movie m
+        order by movie_id ${order}
+    </select>
+
+    <select id="selectAll2" resultMap="movieResult">
+        SELECT m.movie_id,
+               m.title,
+               m.running_time,
+               m.release_date,
+               m.director_id,
+               m.created_at  AS movie_created_at,
+               m.modified_at AS movie_modified_at,
+               d.director_id,
+               d.name        AS director_name,
+               d.birth_date,
+               d.gender,
+               d.debut_year,
+               d.created_at  AS director_created_at,
+               d.modified_at AS director_modified_at,
+               g.genre_id,
+               g.name        AS genre_name
+        FROM movie m
+                 INNER JOIN director d ON m.director_id = d.director_id
+                 INNER JOIN movie_genre_relation mgr ON m.movie_id = mgr.movie_id
+                 INNER JOIN genre g ON mgr.genre_id = g.genre_id
+    </select>
+
+    <resultMap id="movieResult" type="me.parker.springbootmybatismapping.model.Movie">
+        <id property="movieId" column="movie_id"/>
+        <result property="title" column="title"/>
+        <result property="runningTime" column="running_time"/>
+        <result property="releaseDate" column="release_date"/>
+        <result property="createdAt" column="movie_created_at"/>
+        <result property="modifiedAt" column="movie_modified_at"/>
+        <!-- has-one -->
+        <association property="director" javaType="me.parker.springbootmybatismapping.model.Director">
+            <id property="directorId" column="director_id"/>
+            <result property="name" column="director_name"/>
+            <result property="birthDate" column="birth_date"/>
+            <result property="gender" column="gender"/>
+            <result property="debutYear" column="debut_year"/>
+            <result property="createdAt" column="director_created_at"/>
+            <result property="modifiedAt" column="director_modified_at"/>
+        </association>
+        <!-- has-many -->
+        <collection property="genres" ofType="me.parker.springbootmybatismapping.model.Genre">
+            <id property="genreId" column="genre_id"/>
+            <result property="genreType" column="genre_name"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectAll3" resultMap="movieResultUsingNestedResult">
+        SELECT m.movie_id,
+               m.title,
+               m.running_time,
+               m.release_date,
+               m.director_id,
+               m.created_at  AS movie_created_at,
+               m.modified_at AS movie_modified_at,
+               d.director_id,
+               d.name        AS director_name,
+               d.birth_date,
+               d.gender,
+               d.debut_year,
+               d.created_at  AS director_created_at,
+               d.modified_at AS director_modified_at,
+               g.genre_id,
+               g.name        AS genre_name
+        FROM movie m
+                 INNER JOIN director d ON m.director_id = d.director_id
+                 INNER JOIN movie_genre_relation mgr ON m.movie_id = mgr.movie_id
+                 INNER JOIN genre g ON mgr.genre_id = g.genre_id
+    </select>
+
+    <resultMap id="movieResultUsingNestedResult" type="me.parker.springbootmybatismapping.model.Movie">
+        <id property="movieId" column="movie_id"/>
+        <result property="title" column="title"/>
+        <result property="runningTime" column="running_time"/>
+        <result property="releaseDate" column="release_date"/>
+        <result property="createdAt" column="movie_created_at"/>
+        <result property="modifiedAt" column="movie_modified_at"/>
+        <!-- has-one -->
+        <association property="director" column="director_id"
+                     javaType="me.parker.springbootmybatismapping.model.Director"
+                     resultMap="directorResult"/>
+        <!-- has-many -->
+        <collection property="genres" ofType="me.parker.springbootmybatismapping.model.Genre"
+                    resultMap="genreResult"/>
+    </resultMap>
+
+    <resultMap id="directorResult" type="me.parker.springbootmybatismapping.model.Director">
+        <id property="directorId" column="director_id"/>
+        <result property="name" column="director_name"/>
+        <result property="birthDate" column="birth_date"/>
+        <result property="gender" column="gender"/>
+        <result property="debutYear" column="debut_year"/>
+        <result property="createdAt" column="director_created_at"/>
+        <result property="modifiedAt" column="director_modified_at"/>
+    </resultMap>
+
+    <resultMap id="genreResult" type="me.parker.springbootmybatismapping.model.Genre">
+        <id property="genreId" column="genre_id"/>
+        <result property="genreType" column="genre_name"/>
+    </resultMap>
+
+    <select id="selectAll4" resultMap="movieResultUsingNestedSelect">
+        SELECT m.movie_id,
+               m.title,
+               m.running_time,
+               m.release_date,
+               m.director_id,
+               m.created_at  AS movie_created_at,
+               m.modified_at AS movie_modified_at
+        FROM movie m
+    </select>
+
+    <resultMap id="movieResultUsingNestedSelect" type="me.parker.springbootmybatismapping.model.Movie">
+        <id property="movieId" column="movie_id"/>
+        <result property="title" column="title"/>
+        <result property="runningTime" column="running_time"/>
+        <result property="releaseDate" column="release_date"/>
+        <result property="createdAt" column="movie_created_at"/>
+        <result property="modifiedAt" column="movie_modified_at"/>
+        <!-- has-one -->
+        <association property="director" column="director_id"
+                     javaType="me.parker.springbootmybatismapping.model.Director"
+                     select="selectDirectorResult"/>
+        <!-- has-many -->
+        <collection property="genres" column="movie_id" javaType="ArrayList"
+                    ofType="me.parker.springbootmybatismapping.model.Genre"
+                    select="selectGenreResult"/>
+    </resultMap>
+
+    <select id="selectDirectorResult" resultType="me.parker.springbootmybatismapping.model.Director">
+        SELECT d.director_id,
+               d.name,
+               d.birth_date,
+               d.gender,
+               d.debut_year,
+               d.created_at,
+               d.modified_at
+        FROM director d
+        WHERE d.director_id = #{id}
+    </select>
+
+    <select id="selectGenreResult" resultType="me.parker.springbootmybatismapping.model.Genre">
+        SELECT g.genre_id,
+               g.name as genre_type
+        FROM genre g
+                 INNER JOIN movie_genre_relation mgr ON g.genre_id = mgr.genre_id
+        WHERE mgr.movie_id = #{id}
+    </select>
+
+    <select id="selectByTitle" resultType="me.parker.springbootmybatismapping.model.Movie">
+        SELECT movie_id
+             , title
+             , running_time
+             , release_date
+        FROM movie m
+        WHERE m.title = #{title}
+    </select>
+
+    <select id="selectByReleaseDateAndRunningTime" resultType="me.parker.springbootmybatismapping.model.Movie">
+        SELECT movie_id
+             , title
+             , running_time
+             , release_date
+        FROM movie m
+        WHERE m.release_date >= #{releaseDate}
+            AND m.running_time >= #{runningTime}
+    </select>
+
+<!--    <select id="selectByReleaseDateAndRunningTime2"-->
+<!--            resultType="me.parker.springbootmybatismapping.model.Movie">-->
+<!--        SELECT movie_id-->
+<!--             , title-->
+<!--             , running_time-->
+<!--             , release_date-->
+<!--        FROM movie m-->
+<!--        WHERE m.release_date >= #{selectCriteria.releaseDate}-->
+<!--          AND m.running_time >= #{selectCriteria.runningTime}-->
+<!--    </select>-->
+
+    <select id="selectByReleaseDateAndRunningTime2"
+            parameterType="me.parker.springbootmybatismapping.model.SelectCriteria"
+            resultType="me.parker.springbootmybatismapping.model.Movie">
+        SELECT movie_id
+             , title
+             , running_time
+             , release_date
+        FROM movie m
+        WHERE m.release_date >= #{releaseDate}
+          AND m.running_time >= #{runningTime}
+    </select>
+</mapper>

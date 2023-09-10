@@ -1,12 +1,14 @@
-package me.parker.springbootmybatismapping.domain;
+package me.parker.springbootmybatismapping.model;
 
 import lombok.Getter;
 import lombok.ToString;
+
+import java.time.LocalDate;
 
 @Getter
 @ToString
 public class Person {
     private String name;
-    private int age;
+    private LocalDate birthDate;
     private Gender gender;
 }

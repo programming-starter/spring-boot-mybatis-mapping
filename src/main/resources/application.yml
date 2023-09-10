@@ -7,4 +7,6 @@ spring:
 
 # mybatis mapper.xml location 설정(기본 location: main/resources 에 추가된 부분 설정)
 mybatis:
-  mapper-locations: mapper/*.xml
+  mapper-locations: classpath:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
